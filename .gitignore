@@ -1,0 +1,30 @@
+# Visual Studio files
+.vs
+.vscode
+.suo
+.user
+.sln.docstates
+
+# Build results
+bin
+obj
+
+# NuGet packages
+.nuget.props
+.nuget.targets
+Packages
+
+# Resharper files
+.resharper
+.ReSharper
+
+# Build results
+[Bb]uild
+
+# Other temporary files
+[Tt]emp
+[Tt]est[Rr]esult
+.log
+
+# Additionals files
+*.pdf

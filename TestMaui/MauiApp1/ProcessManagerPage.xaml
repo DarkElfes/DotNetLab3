@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:diagnostics="clr-namespace:System.Diagnostics;assembly=System"
+             x:Class="MauiApp1.ProcessManagerPage"
+             Title="ProcessManagerPage">
+    <StackLayout Padding="30">
+        <StackLayout Spacing="10" Margin="10" HorizontalOptions="Center" Orientation="Horizontal">
+            <Button
+                Text="Calculator"
+                Command="{Binding StartProcessCommand}"
+                CommandParameter="calc.exe"/>
+            <Button
+                Text="Word"
+                Command="{Binding StartProcessCommand}"
+                CommandParameter="C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"/>
+            <Button
+                Text="Notepad"
+                Command="{Binding StartProcessCommand}"
+                CommandParameter="notepad"/>
+            <Button
+                Text="PowerPoint"
+                Command="{Binding StartProcessCommand}"
+                CommandParameter="C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE"/>
+            <Button
+                Text="Excel"
+                Command="{Binding StartProcessCommand}"
+                CommandParameter="C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE"/>
+        </StackLayout>
+
+        <ListView ItemsSource="{Binding Processes}" x:Name="ListView">
+            <ListView.Resources>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Grid.ColumnDefinitions" Value="*,*,*,*,*,*"/>
+                    <Setter Property="RowSpacing" Value="40"/>
+                    <Setter Property="Margin" Value="10"/>  
+                </Style>
+                <Style TargetType="{x:Type Label}">
+                    <Setter Property="HorizontalTextAlignment" Value="Center"/>
+                    <Setter Property="VerticalTextAlignment" Value="Center"/>
+                </Style>
+            </ListView.Resources>
+
+            <ListView.Header>
+                <Grid>
+                    <Grid.Resources>
+                        <Style TargetType="{x:Type Label}">
+                            <Setter Property="FontAttributes" Value="Bold"/>
+                            <Setter Property="HorizontalTextAlignment" Value="Center"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Label Text="Name" />
+                    <Label Text="Memory using" Grid.Column="1" />
+                    <Label Text="Start time" Grid.Column="2"/>
+                    <Label Text="Priority"  Grid.Column="3"/>
+                    <Label Text="Threads count" Grid.Column="4"/>
+                    <Label Text="Close" Grid.Column="5"/>
+                </Grid>
+            </ListView.Header>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid>
+                            <Label Text="{Binding ProcessName}" />
+                            <Label Text="{Binding WorkingSet64}" Grid.Column="1"/>
+                            <Label Text="{Binding StartTime}" Grid.Column="2"/>
+                            <Picker Grid.Column="3" SelectedItem="{Binding PriorityClass}">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type diagnostics:ProcessPriorityClass}">
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.Idle"/>
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.BelowNormal"/>
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.Normal"/>
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.AboveNormal"/>
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.High"/>
+                                        <x:Static Member="diagnostics:ProcessPriorityClass.RealTime"/>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                            <Label Text="{Binding Threads.Count}" Grid.Column="4"/>
+                            <Button Command="{Binding BindingContext.CloseProcessCommand, Source={x:Reference ListView}}"
+                                    CommandParameter = "{Binding Id}"   
+                                    Text="Close" Grid.Column="5"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiApp1.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20">
+
+            <FlexLayout Direction="Row" >
+                <Entry Placeholder="File"
+                       Text="{Binding PathFile}"
+                       Margin="0, 0, 10, 0"
+                       FlexLayout.Grow="1"/>
+                <Button Text="Open file dialog"
+                        Command="{Binding OpenFileDialogCommand}"/>
+            </FlexLayout>
+            <Entry Placeholder="Key" FlexLayout.Basis="50%"
+                   Text="{Binding Key}"/>
+
+            <FlexLayout JustifyContent="Center">
+                <Button Text="Encrypt" CharacterSpacing="5" Margin="5, 0"
+                    Command="{Binding EncryptCommand}"/>
+
+                <Button Text="Decrypt" CharacterSpacing="5" Margin="5, 0"
+                    Command="{Binding DecryptCommand}"/>
+            </FlexLayout>
+
+            <FlexLayout JustifyContent="SpaceBetween">
+                <StackLayout FlexLayout.Basis="50%"
+                             Spacing="5">
+                    <Label Text="Progress:"/>
+                    <ProgressBar Progress="{Binding Progress}"
+                                 ProgressColor="#B290E2"/>
+                </StackLayout>
+
+                <Label Text="{Binding Timer, StringFormat='Total time: {0} seconds'}"
+                       HorizontalOptions="Center"/>
+
+            </FlexLayout>
+            <Label Text="{Binding StatusMessage}"
+                       HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
