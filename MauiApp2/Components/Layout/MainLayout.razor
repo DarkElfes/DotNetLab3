@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+
+
+@* Required *@
+<MudThemeProvider IsDarkMode="true" Theme="@Theme" />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudDrawer Open="true" Elevation="3">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h5">Lab 3</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu Color="Color.Primary" Bordered="true">
+            <MudNavLink Href="/encryption" Icon="@Icons.Material.Filled.EnhancedEncryption">Encryption</MudNavLink>
+            <MudNavLink Href="/processManager" Icon="@Icons.Material.Filled.ManageSearch">Process Manager</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Gutters="true">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+
+@code{
+    MudTheme Theme = new()
+    {
+        PaletteDark = new(){
+            Background = "#111111",
+            DrawerBackground = Colors.Shades.Black,
+            Surface = Colors.Shades.Black,
+            Primary = "#78398A"
+        }
+    };
+}

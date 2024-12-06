@@ -1,0 +1,117 @@
+﻿@using FluentResults
+@using MauiApp2.Domain;
+@using static MauiApp2.Domain.Encryption
+@using System.Timers;
+@using MauiApp2.Services
+
+@page "/encryption"
+
+@implements IDisposable
+
+<MudStack>
+    <MudPaper>
+        <MudStack Justify="Justify.SpaceEvenly"
+                  Style="padding: 10px">
+
+            <MudStack Row="true"
+                      Justify="Justify.SpaceBetween"
+                      AlignItems="AlignItems.Center">
+                <MudText>File: @(_fileResult?.FullPath ?? "please, chose the file")</MudText>
+                <MudButton OnClick="PickFileAsync"
+                           Color="Color.Primary"
+                           Variant="Variant.Outlined">
+                    Chose file
+                </MudButton>
+            </MudStack>
+
+            <MudTextField @bind-Value="_key"
+                          Label="Key"
+                          Variant="Variant.Filled" />
+
+            <MudStack Row="true"
+                      Justify="Justify.FlexEnd"
+                      AlignItems="AlignItems.Center">
+                <MudButton OnClick="EncodeFileAsync"
+                           Color="Color.Secondary"
+                           Disabled="EncryptionService.IsWork">
+                    Encode
+                </MudButton>
+                <MudButton OnClick="DecodeFileAsync"
+                           Color="Color.Secondary"
+                           Disabled="EncryptionService.IsWork">
+                    Decode
+                </MudButton>
+            </MudStack>
+
+            @if (EncryptionService.IsWork)
+            {
+                <MudProgressLinear Color="Color.Primary" Value="@EncryptionService.Progress" />
+                <MudStack Row="true"
+                          Justify="Justify.SpaceBetween"
+                          AlignItems="AlignItems.Center">
+                    <MudText>@EncryptionService.Progress%</MudText>
+                    <MudText>@EncryptionService.TimeSpent</MudText>
+                </MudStack>
+            }
+        </MudStack>
+    </MudPaper>
+
+    @if (EncryptionService.Infos.Count > 0)
+    {
+        <MudText>History: </MudText>
+        @foreach (var info in EncryptionService.Infos)
+        {
+            <MudPaper Style="padding: 10px">
+                <MudStack Row="true"
+                          Justify="Justify.SpaceBetween">
+                    <MudText>@info.DestFileName</MudText>
+                    <MudText>@info.Size Mb</MudText>
+                    <MudText>@info.TimeSpent</MudText>
+                    <MudText>@info.EncryptionType</MudText>
+                </MudStack>
+            </MudPaper>
+        }
+    }
+</MudStack>
+
+
+
+
+@code {
+    [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required EncryptionService EncryptionService { get; set; }
+
+    private string _key = string.Empty;
+    private FileResult? _fileResult;
+
+    protected override void OnInitialized()
+        => EncryptionService.ValuesChanged += () => InvokeAsync(StateHasChanged);
+
+
+    async Task PickFileAsync()
+    {
+#if WINDOWS
+    _fileResult =  await FilePicker.Default.PickAsync();
+#endif
+    }
+
+    async Task EncodeFileAsync()
+        => HandleResult(await EncryptionService.EncodeFileAsync(_fileResult?.FullPath!, _key));
+
+    async Task DecodeFileAsync()
+        => HandleResult(await EncryptionService.DecodeFileAsync(_fileResult?.FullPath!, _key));
+
+
+    void HandleResult(Result<Info> result)
+    {
+        if (result.IsSuccess)
+            Snackbar.Add(result.Successes.Last().Message, Severity.Success);
+        else
+            Snackbar.Add(result.Errors.Last().Message, Severity.Error);
+
+        (_fileResult, _key) = (null, string.Empty);
+    }
+
+    public void Dispose()
+        => EncryptionService.ValuesChanged -= () => InvokeAsync(StateHasChanged);
+}

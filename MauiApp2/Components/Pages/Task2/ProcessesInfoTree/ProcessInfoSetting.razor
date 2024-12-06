@@ -1,0 +1,60 @@
+﻿@using MauiApp2.Processes
+@using MauiApp2.Services
+@using System.Diagnostics
+
+
+@if (ProcessInfo is not null && !ProcessInfo.IsExited)
+{
+    <MudSimpleTable>
+        <thead>
+            <tr>
+                <th>Process Name</th>
+                <th>Start Time</th>
+                <th>Count Threads</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@ProcessInfo.ProcessName</td>
+                <td>@ProcessInfo.StartTime</td>
+                <td>@ProcessInfo.Process?.Threads?.Count</td>
+                <td>
+                    <MudSelect @bind-Value="ProcessInfo.Process.PriorityClass">
+                        @foreach (ProcessPriorityClass priorityClass in Enum.GetValues(typeof(ProcessPriorityClass)))
+                        {
+                            <MudSelectItem Value="priorityClass">@priorityClass</MudSelectItem>
+                        }
+
+                    </MudSelect>
+                </td>
+                <td>
+                    <MudButton OnClick="StopProcess"
+                               Color="Color.Primary">
+                        Stop
+                    </MudButton>
+                </td>
+            </tr>
+        </tbody>
+    </MudSimpleTable>
+}
+
+
+
+@code {
+    [Inject] public required ProcessManager ProcessManager { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
+
+    [Parameter] public required ProcessInfo ProcessInfo { get; set; }
+
+    async Task StopProcess()
+    {
+        var result = await Task.Run(() => ProcessManager.StopProcess(ProcessInfo!.ProcessId));
+
+        if (result.IsSuccess)
+            Snackbar.Add(result.Successes.FirstOrDefault()?.Message ?? "Unhandled message", Severity.Success);
+        else
+            Snackbar.Add(result.Errors.FirstOrDefault()?.Message ?? "Unhandled message", Severity.Error);
+    }
+
+}

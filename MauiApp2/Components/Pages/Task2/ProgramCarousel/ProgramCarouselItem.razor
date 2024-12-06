@@ -1,0 +1,37 @@
+﻿@using MauiApp2.Services
+
+
+<MudCarouselItem Transition="Transition.Slide"
+                 Style="@(
+    @"background: radial-gradient(circle at 50% 50%, rgba(118, 57, 138, 0.8), rgba(17, 17, 17, 1)),
+        url(""data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.87' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"");"
+                 )">
+
+    <div class="d-flex" style="height:100%">
+        <MudIconButton OnClick="LaunchProcess"
+                       Class="mx-auto my-auto"
+                       Style="color: white;"
+                       Icon="@Icon"
+                       Size="@Size.Large" />
+    </div>
+</MudCarouselItem>
+
+
+@code {
+    [Inject] public required ProcessManager ProcessManager { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
+
+    [Parameter] public required string ProgramPath { get; set; }
+    [Parameter] public required string Icon { get; set; }
+
+
+    async Task LaunchProcess()
+    {
+        var result = await Task.Run(() => ProcessManager.StartProcess(ProgramPath));
+
+        if (result.IsSuccess)
+            Snackbar.Add(result.Successes.Last()?.Message ?? "Unhandled message", Severity.Success);
+        else
+            Snackbar.Add(result.Errors.Last()?.Message ?? "Unhandled message", Severity.Error);
+    }
+}
