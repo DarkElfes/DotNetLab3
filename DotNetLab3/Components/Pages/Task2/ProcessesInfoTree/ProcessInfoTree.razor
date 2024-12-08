@@ -1,0 +1,76 @@
+﻿@using System.Diagnostics
+@using DotNetLab3.Domain.Processes
+
+@implements IDisposable
+
+<MudStack Row StretchItems="StretchItems.End" AlignItems="AlignItems.Start">
+    <MudPaper Elevation="10" Width="30%">
+        <MudTreeView Items="TreeItems"
+        Hover ExpandOnClick
+        @bind-SelectedValue="@_selectedProcessInfo">
+            <ItemTemplate Context="item">
+                @{
+                    var presenter = item as ProcessInfoPresenter;
+                }
+                <MudTreeViewItem Items="@item.Children" Value="@item.Value">
+                    <BodyContent>
+                        <MudStack Row Style="width: 100%"
+                        Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Color="@((presenter?.IsExited ?? true) ? Color.Error : Color.Default)">@presenter?.ProcessName</MudText>
+                        </MudStack>
+                    </BodyContent>
+                </MudTreeViewItem>
+            </ItemTemplate>
+        </MudTreeView>
+    </MudPaper>
+
+
+    @if (_selectedProcessInfo is not null)
+    {
+        <MudPaper Elevation="10">
+            <ProcessInfoSetting ProcessInfo="_selectedProcessInfo" />
+        </MudPaper>
+    }
+</MudStack>
+
+
+@code {
+    [Inject] public required ProcessManager ProcessManager { get; set; }
+
+    private List<ProcessInfoPresenter> TreeItems { get; set; } = [];
+    private ProcessInfo? _selectedProcessInfo { get; set; }
+
+    protected override void OnInitialized()
+        => ProcessManager.ProcessesChanged += UpdateProcesses;
+
+    void UpdateProcesses()
+    {
+        TreeItems = ProcessManager.ProcessesInfo.Select(p => new ProcessInfoPresenter(p)).ToList();
+        if (_selectedProcessInfo?.IsExited ?? true)
+            _selectedProcessInfo = null;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+        => ProcessManager.ProcessesChanged -= UpdateProcesses;
+
+
+    internal class ProcessInfoPresenter : TreeItemData<ProcessInfo>
+    {
+        public readonly Process Process;
+        public readonly string ProcessName;
+        public readonly DateTime StartTime;
+        public readonly bool IsExited;
+
+        public ProcessInfoPresenter(ProcessInfo processInfo) : base(processInfo)
+        {
+            (Process, ProcessName, StartTime, IsExited) =
+                (processInfo.Process, processInfo.ProcessName, processInfo.StartTime, processInfo.IsExited);
+
+            Children = processInfo.Children
+                .Select(c => new ProcessInfoPresenter(c))
+                .Cast<TreeItemData<ProcessInfo>>()
+                .ToList();
+        }
+    }
+}
